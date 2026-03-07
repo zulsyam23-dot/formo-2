@@ -1,0 +1,94 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://formo.dev/schema/ir/0.3.0",
+  "title": "Formo IR",
+  "type": "object",
+  "required": ["irVersion", "entry", "target", "components", "nodes", "styles"],
+  "properties": {
+    "irVersion": { "const": "0.3.0" },
+    "entry": { "type": "string", "minLength": 1 },
+    "target": { "enum": ["web", "desktop", "multi"] },
+    "components": { "type": "array", "items": { "$ref": "#/$defs/component" } },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+    "styles": { "type": "array", "items": { "$ref": "#/$defs/style" } },
+    "tokens": { "type": "object", "additionalProperties": { "$ref": "#/$defs/value" } },
+    "diagnostics": { "type": "array", "items": { "$ref": "#/$defs/diagnostic" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "value": {
+      "type": "object",
+      "required": ["t", "v"],
+      "properties": {
+        "t": { "enum": ["string", "int", "float", "bool", "color", "len", "list", "object"] },
+        "v": {}
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "required": ["file", "line", "col"],
+      "properties": {
+        "file": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "col": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "kind", "name", "props", "children", "source"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["element", "text", "slot", "if", "for"] },
+        "name": { "type": "string" },
+        "props": { "type": "object", "additionalProperties": { "$ref": "#/$defs/value" } },
+        "styleRefs": { "type": "array", "items": { "type": "string" } },
+        "children": { "type": "array", "items": { "type": "string" } },
+        "source": { "$ref": "#/$defs/source" }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "name", "rootNodeId", "exports", "source"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "rootNodeId": { "type": "string" },
+        "exports": { "type": "boolean" },
+        "source": { "$ref": "#/$defs/source" }
+      },
+      "additionalProperties": false
+    },
+    "style": {
+      "type": "object",
+      "required": ["id", "selector", "decls"],
+      "properties": {
+        "id": { "type": "string" },
+        "selector": {
+          "type": "object",
+          "required": ["component", "part"],
+          "properties": {
+            "component": { "type": "string" },
+            "part": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "decls": { "type": "object", "additionalProperties": { "$ref": "#/$defs/value" } }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "level", "message", "source"],
+      "properties": {
+        "code": { "type": "string" },
+        "level": { "enum": ["error", "warning"] },
+        "message": { "type": "string" },
+        "source": { "$ref": "#/$defs/source" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

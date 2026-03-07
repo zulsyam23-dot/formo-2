@@ -1,0 +1,92 @@
+﻿{
+  "irVersion": "0.3.0",
+  "entry": "App",
+  "target": "web",
+  "tokens": {
+    "color.text": {
+      "t": "color",
+      "v": "#111111"
+    }
+  },
+  "components": [
+    {
+      "id": "c_app",
+      "name": "App",
+      "rootNodeId": "n1",
+      "exports": true,
+      "source": {
+        "file": "main.fm",
+        "line": 1,
+        "col": 1
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "element",
+      "name": "Page",
+      "props": {},
+      "styleRefs": [
+        "PageRoot"
+      ],
+      "children": [
+        "n2"
+      ],
+      "source": {
+        "file": "main.fm",
+        "line": 2,
+        "col": 3
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "text",
+      "name": "Text",
+      "props": {
+        "value": {
+          "t": "string",
+          "v": "Hello Formo"
+        }
+      },
+      "styleRefs": [
+        "BodyText"
+      ],
+      "children": [],
+      "source": {
+        "file": "main.fm",
+        "line": 3,
+        "col": 5
+      }
+    }
+  ],
+  "styles": [
+    {
+      "id": "PageRoot",
+      "selector": {
+        "component": "Page",
+        "part": "root"
+      },
+      "decls": {
+        "background-color": {
+          "t": "color",
+          "v": "#ffffff"
+        }
+      }
+    },
+    {
+      "id": "BodyText",
+      "selector": {
+        "component": "Text",
+        "part": "root"
+      },
+      "decls": {
+        "color": {
+          "t": "string",
+          "v": "token(color.text)"
+        }
+      }
+    }
+  ],
+  "diagnostics": []
+}

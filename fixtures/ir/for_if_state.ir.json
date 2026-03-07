@@ -1,0 +1,149 @@
+﻿{
+  "irVersion": "0.3.0",
+  "entry": "App",
+  "target": "multi",
+  "components": [
+    {
+      "id": "c_app",
+      "name": "App",
+      "rootNodeId": "n1",
+      "exports": true,
+      "source": {
+        "file": "main.fm",
+        "line": 1,
+        "col": 1
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "element",
+      "name": "Page",
+      "props": {},
+      "styleRefs": [],
+      "children": [
+        "n2",
+        "n5"
+      ],
+      "source": {
+        "file": "main.fm",
+        "line": 2,
+        "col": 3
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "for",
+      "name": "For",
+      "props": {
+        "each": {
+          "t": "list",
+          "v": [
+            "A",
+            "B",
+            "C"
+          ]
+        },
+        "as": {
+          "t": "string",
+          "v": "item"
+        }
+      },
+      "styleRefs": [],
+      "children": [
+        "n3"
+      ],
+      "source": {
+        "file": "main.fm",
+        "line": 3,
+        "col": 5
+      }
+    },
+    {
+      "id": "n3",
+      "kind": "element",
+      "name": "Row",
+      "props": {},
+      "styleRefs": [],
+      "children": [
+        "n4"
+      ],
+      "source": {
+        "file": "main.fm",
+        "line": 4,
+        "col": 7
+      }
+    },
+    {
+      "id": "n4",
+      "kind": "text",
+      "name": "Text",
+      "props": {
+        "value": {
+          "t": "string",
+          "v": "item"
+        }
+      },
+      "styleRefs": [],
+      "children": [],
+      "source": {
+        "file": "main.fm",
+        "line": 5,
+        "col": 9
+      }
+    },
+    {
+      "id": "n5",
+      "kind": "if",
+      "name": "If",
+      "props": {
+        "when": {
+          "t": "bool",
+          "v": true
+        }
+      },
+      "styleRefs": [],
+      "children": [
+        "n6"
+      ],
+      "source": {
+        "file": "main.fm",
+        "line": 8,
+        "col": 5
+      }
+    },
+    {
+      "id": "n6",
+      "kind": "text",
+      "name": "Text",
+      "props": {
+        "value": {
+          "t": "string",
+          "v": "Shown"
+        }
+      },
+      "styleRefs": [],
+      "children": [],
+      "source": {
+        "file": "main.fm",
+        "line": 9,
+        "col": 7
+      }
+    }
+  ],
+  "styles": [],
+  "tokens": {},
+  "diagnostics": [
+    {
+      "code": "W1000",
+      "level": "warning",
+      "message": "example diagnostic",
+      "source": {
+        "file": "main.fm",
+        "line": 1,
+        "col": 1
+      }
+    }
+  ]
+}

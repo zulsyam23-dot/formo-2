@@ -1,0 +1,265 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint (Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Cargo check
+        run: cargo check --workspace
+
+      - name: Cargo clippy (deny warnings)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  test:
+    name: Check and Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Cargo test
+        run: cargo test --workspace
+
+  fuzz-parser:
+    name: Fuzz Parser Smoke (Ubuntu)
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: llvm-tools-preview
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-fuzz
+        run: cargo +nightly install cargo-fuzz --locked
+
+      - name: Run parser fuzz smoke
+        working-directory: crates/formo-parser
+        run: cargo +nightly fuzz run parser_parse -- -max_total_time=20
+
+      - name: Upload fuzz artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formo-parser-fuzz-artifacts
+          path: |
+            crates/formo-parser/fuzz/artifacts
+            crates/formo-parser/fuzz/corpus
+          if-no-files-found: warn
+          retention-days: 7
+
+  smoke:
+    name: Smoke App (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: [test, fuzz-parser]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Formo check sample
+        run: cargo run -p formo-cli -- check --input main.fm
+
+      - name: Formo diagnose sample (json schema)
+        run: cargo run -p formo-cli -- diagnose --input main.fm --json-schema
+
+      - name: Formo build web sample (production)
+        run: cargo run -p formo-cli -- build --target web --input main.fm --out dist-ci/web --prod
+
+      - name: Formo build desktop sample
+        run: cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-ci/desktop
+
+      - name: Validate generated bundles
+        shell: pwsh
+        run: |
+          $required = @(
+            "dist-ci/web/index.html",
+            "dist-ci/web/app.css",
+            "dist-ci/web/app.js",
+            "dist-ci/desktop/index.html",
+            "dist-ci/desktop/app.css",
+            "dist-ci/desktop/app.js",
+            "dist-ci/desktop/desktop-bridge.js",
+            "dist-ci/desktop/app.ir.json"
+          )
+
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) {
+              throw "missing artifact file: $path"
+            }
+          }
+
+          $desktopHtml = Get-Content -Raw "dist-ci/desktop/index.html"
+          if ($desktopHtml -notmatch "desktop-bridge.js") {
+            throw "desktop index.html missing desktop bridge script reference"
+          }
+
+      - name: Upload smoke artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: formo-dist-ci
+          path: dist-ci
+          retention-days: 7
+
+  benchmark:
+    name: Benchmark Baseline (Ubuntu)
+    runs-on: ubuntu-latest
+    needs: smoke
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run benchmark baseline
+        run: cargo run -p formo-cli -- bench --input main.fm --iterations 12 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --json-pretty --max-compile-p95-ms 120 --max-first-render-p95-ms 10
+
+      - name: Validate benchmark report
+        shell: pwsh
+        run: |
+          $report = "dist-ci/bench/benchmark.json"
+          if (-not (Test-Path $report)) {
+            throw "missing benchmark report: $report"
+          }
+
+          $json = Get-Content -Raw $report | ConvertFrom-Json
+          if (-not $json.ok) {
+            throw "benchmark report marked as failed"
+          }
+          if (-not $json.budget.enabled) {
+            throw "benchmark budget section should be enabled in CI run"
+          }
+          if (-not $json.budget.ok) {
+            throw "benchmark budget check failed"
+          }
+          if ($json.benchmark.compileMs.count -lt 1) {
+            throw "benchmark compile samples missing"
+          }
+          if ($json.benchmark.firstRenderMs.count -lt 1) {
+            throw "benchmark firstRender samples missing"
+          }
+          if ($json.fixture.simulatedRenderedNodeCount -lt 1000) {
+            throw "benchmark simulated rendered node count is below 1k target"
+          }
+
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formo-benchmark
+          path: dist-ci/bench
+          retention-days: 14
+
+  readme-examples:
+    name: README Examples (Ubuntu)
+    runs-on: ubuntu-latest
+    needs: benchmark
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run README non-watch commands
+        shell: pwsh
+        run: ./scripts/ci_run_readme_examples.ps1
+
+      - name: Validate README build outputs
+        shell: pwsh
+        run: |
+          $required = @(
+            "dist-readme/web/index.html",
+            "dist-readme/web/app.css",
+            "dist-readme/web/app.js",
+            "dist-readme/desktop/index.html",
+            "dist-readme/desktop/app.css",
+            "dist-readme/desktop/app.js",
+            "dist-readme/desktop/desktop-bridge.js",
+            "dist-readme/desktop/app.ir.json",
+            "dist-readme/multi/web/index.html",
+            "dist-readme/multi/desktop/index.html",
+            "dist-readme/web-prod/index.html",
+            "dist-ci/readme/benchmark.json"
+          )
+
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) {
+              throw "missing README example output: $path"
+            }
+          }
+
+      - name: Upload README example artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: formo-readme-examples
+          path: |
+            dist-readme
+            dist-ci/readme
+          retention-days: 7
+
+  release-readiness:
+    name: Release Readiness (Ubuntu)
+    runs-on: ubuntu-latest
+    needs: readme-examples
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify release docs/checklist
+        shell: pwsh
+        run: ./scripts/ci_verify_release_readiness.ps1

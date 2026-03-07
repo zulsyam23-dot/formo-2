@@ -1,0 +1,13 @@
+﻿[package]
+name = "formo-style"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+formo-typer = { path = "../formo-typer" }
+formo-ir = { path = "../formo-ir" }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+formo-parser = { path = "../formo-parser" }
+formo-resolver = { path = "../formo-resolver" }
