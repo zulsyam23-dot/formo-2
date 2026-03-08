@@ -20,10 +20,10 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Cargo check
-        run: cargo check --workspace
+        run: cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
 
       - name: Cargo clippy (deny warnings)
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace --all-targets -- -D warnings
 
   test:
     name: Check and Test (${{ matrix.os }})
@@ -45,7 +45,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Cargo test
-        run: cargo test --workspace
+        run: cargo test --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
 
   fuzz-parser:
     name: Fuzz Parser Smoke (Ubuntu)
@@ -68,8 +68,7 @@ jobs:
         run: cargo +nightly install cargo-fuzz --locked
 
       - name: Run parser fuzz smoke
-        working-directory: crates/formo-parser
-        run: cargo +nightly fuzz run parser_parse -- -max_total_time=20
+        run: cargo +nightly fuzz run parser_parse --manifest-path ../formo-library-ecosystem/language-core/programs/formo-parser/fuzz/Cargo.toml -- -max_total_time=20
 
       - name: Upload fuzz artifacts
         if: always()
@@ -77,8 +76,8 @@ jobs:
         with:
           name: formo-parser-fuzz-artifacts
           path: |
-            crates/formo-parser/fuzz/artifacts
-            crates/formo-parser/fuzz/corpus
+            ../formo-library-ecosystem/language-core/programs/formo-parser/fuzz/artifacts
+            ../formo-library-ecosystem/language-core/programs/formo-parser/fuzz/corpus
           if-no-files-found: warn
           retention-days: 7
 
@@ -102,16 +101,16 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Formo check sample
-        run: cargo run -p formo-cli -- check --input main.fm
+        run: cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- check --input main.fm
 
       - name: Formo diagnose sample (json schema)
-        run: cargo run -p formo-cli -- diagnose --input main.fm --json-schema
+        run: cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- diagnose --input main.fm --json-schema
 
       - name: Formo build web sample (production)
-        run: cargo run -p formo-cli -- build --target web --input main.fm --out dist-ci/web --prod
+        run: cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist-ci/web --prod
 
       - name: Formo build desktop sample
-        run: cargo run -p formo-cli -- build --target desktop --input main.fm --out dist-ci/desktop
+        run: cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target desktop --input main.fm --out dist-ci/desktop
 
       - name: Validate generated bundles
         shell: pwsh
@@ -162,7 +161,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run benchmark baseline
-        run: cargo run -p formo-cli -- bench --input main.fm --iterations 12 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --json-pretty --max-compile-p95-ms 120 --max-first-render-p95-ms 10
+        run: cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- bench --input main.fm --iterations 12 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --json-pretty --max-compile-p95-ms 120 --max-first-render-p95-ms 10
 
       - name: Validate benchmark report
         shell: pwsh

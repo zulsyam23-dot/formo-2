@@ -1,9 +1,0 @@
-﻿[package]
-name = "formo-backend-desktop"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-formo-backend-web = { path = "../formo-backend-web" }
-formo-ir = { path = "../formo-ir" }
-serde_json = { workspace = true }

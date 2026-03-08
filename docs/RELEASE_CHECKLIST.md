@@ -1,12 +1,12 @@
 ﻿# Release Checklist
 
-Checklist ini dipakai sebelum membuat rilis resmi.
+Checklist ini dipakai sebelum membuat rilis resmi Formo.
 
-## 1. Semver Tag
+## 1) Semver dan Tag
 
-- Pilih versi rilis sesuai semver (`MAJOR.MINOR.PATCH`).
-- Buat git tag dengan format `vX.Y.Z`.
-- Pastikan tag menunjuk commit yang sudah lulus CI.
+- tentukan versi `MAJOR.MINOR.PATCH`,
+- buat tag `vX.Y.Z`,
+- pastikan tag menunjuk commit yang lulus CI.
 
 Contoh:
 
@@ -15,31 +15,42 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-## 2. Changelog
+## 2) Changelog
 
-- Pindahkan item dari section `## [Unreleased]` di `CHANGELOG.md` ke section versi baru.
-- Tambahkan tanggal rilis format `YYYY-MM-DD`.
-- Pastikan perubahan breaking diberi catatan yang jelas.
+- pindahkan item dari `## [Unreleased]` ke section versi baru,
+- tambahkan tanggal rilis (`YYYY-MM-DD`),
+- tandai breaking change secara eksplisit.
 
-## 3. Migration Notes
+## 3) Migration Notes
 
-- Update `docs/IR_MIGRATIONS.md` bila ada perubahan kontrak IR/API.
-- Pastikan `docs/IR_COMPATIBILITY.md` masih akurat.
-- Jika ada breaking change, sertakan langkah migrasi minimal.
+- update `docs/IR_MIGRATIONS.md` bila ada perubahan IR,
+- pastikan `docs/IR_COMPATIBILITY.md` tetap akurat,
+- sertakan langkah migrasi untuk perubahan breaking.
 
-## 4. Quality Gate
+## 4) Quality Gate
 
-- CI hijau pada branch rilis:
-  - lint
-  - test
-  - fuzz-parser
-  - smoke
-  - benchmark
-  - readme-examples
-  - release-readiness
+CI branch rilis wajib hijau:
+- lint
+- test
+- fuzz-parser
+- smoke
+- benchmark
+- readme-examples
+- release-readiness
 
-## 5. Final Validation
+## 5) Final Validation
 
-- `cargo test --workspace`
-- `cargo clippy --workspace --all-targets -- -D warnings`
-- Pastikan artefak build web/desktop dapat dihasilkan dari `main.fm`.
+```bash
+cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
+cargo clippy --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace --all-targets -- -D warnings
+cargo test --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
+```
+
+Pastikan build `web` dan `desktop` dari `main.fm` berhasil.
+
+## 6) Gate Khusus Formo 0.2 (Library-First)
+
+- root `formo` tidak memiliki source crate compiler/runtime/tooling,
+- command dokumentasi konsisten memakai `--manifest-path ../formo-library-ecosystem/Cargo.toml`,
+- `docs/LIBRARY_BOUNDARY.md` konsisten dengan implementasi aktual,
+- `formo-library-ecosystem` branch `main` sudah ter-push.

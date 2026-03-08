@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$ManifestPath = "..\formo-library-ecosystem\Cargo.toml"
 
 function Run-Cargo {
     param(
@@ -6,10 +7,11 @@ function Run-Cargo {
         [string[]]$Args
     )
 
-    Write-Host ">> cargo $($Args -join ' ')"
-    & cargo @Args
+    $finalArgs = @("--manifest-path", $ManifestPath) + $Args
+    Write-Host ">> cargo $($finalArgs -join ' ')"
+    & cargo @finalArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "command failed: cargo $($Args -join ' ')"
+        throw "command failed: cargo $($finalArgs -join ' ')"
     }
 }
 

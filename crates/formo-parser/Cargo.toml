@@ -1,7 +1,0 @@
-﻿[package]
-name = "formo-parser"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-formo-lexer = { path = "../formo-lexer" }

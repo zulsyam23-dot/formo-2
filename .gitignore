@@ -18,3 +18,5 @@ Thumbs.db
 # Optional local overrides
 .env
 .env.*
+
+.fake

@@ -1,66 +1,29 @@
-# Panduan Penggunaan Formo (Lengkap)
+﻿# Panduan Penggunaan Formo
 
 Update: 2026-03-07
 
-Dokumen ini fokus ke cara pakai Formo dari nol sampai siap dipakai di workflow tim.
-Roadmap produksi ada di `PRODUCTION_ROADMAP.md`.
+Dokumen ini menjelaskan cara pakai Formo dalam model `0.2` (library-first), dari validasi source sampai build artifact.
 
-## 1) Gambaran Singkat
+## 1) Model Repository
 
-Formo adalah bahasa deklaratif untuk UI lintas target:
-
-- Web: output `index.html`, `app.css`, `app.js`
-- Desktop (saat ini): output bundle webview + `desktop-bridge.js` + `app.ir.json`
-
-Pipeline compile:
-
-`lexer -> parser -> resolver -> typer -> style -> lowering IR -> backend`
+- Root `formo` menyimpan source bahasa aplikasi (`.fm`, `.fs`) + dokumentasi + kontrak.
+- Source compiler/runtime/tooling berada di `../formo-library-ecosystem`.
+- Semua command CLI menggunakan:
+  - `--manifest-path ../formo-library-ecosystem/Cargo.toml`
 
 ## 2) Prasyarat
 
-- Rust toolchain stable
-- Cargo tersedia di PATH
-- Workspace Formo terbuka di root project
+- Rust stable terpasang.
+- Cargo tersedia di PATH.
+- Folder `formo` dan `formo-library-ecosystem` berada dalam parent direktori yang sama.
 
-Verifikasi cepat:
-
-```bash
-cargo check --workspace
-```
-
-## 3) Quick Start (5 Menit)
-
-1. Validasi source:
+Verifikasi:
 
 ```bash
-cargo run -p formo-cli -- check --input main.fm
+cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
 ```
 
-2. Lihat diagnostik detail:
-
-```bash
-cargo run -p formo-cli -- diagnose --input main.fm
-```
-
-3. Build target web:
-
-```bash
-cargo run -p formo-cli -- build --target web --input main.fm --out dist
-```
-
-4. Build target desktop bundle:
-
-```bash
-cargo run -p formo-cli -- build --target desktop --input main.fm --out dist
-```
-
-5. Build multi-target:
-
-```bash
-cargo run -p formo-cli -- build --target multi --input main.fm --out dist
-```
-
-## 4) Struktur Proyek yang Disarankan
+## 3) Struktur Proyek Formo
 
 ```text
 .
@@ -69,36 +32,51 @@ cargo run -p formo-cli -- build --target multi --input main.fm --out dist
 |  |- header.fm
 |- styles/
 |  |- base.fs
-|- dist/                 # output build
-|- crates/               # source compiler/runtime
+|- fixtures/
 |- docs/
-|  |- PANDUAN_PENGGUNAAN.md
 ```
 
-Contoh import lintas file:
+## 4) Quick Start
 
-```fm
-import "views/header.fm" as Header;
-import "styles/base.fs" as Base;
+1. Check:
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- check --input main.fm
+```
+
+2. Diagnose:
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- diagnose --input main.fm --json
+```
+
+3. Build web:
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist
+```
+
+4. Build desktop:
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target desktop --input main.fm --out dist
 ```
 
 ## 5) Bahasa Formo `.fm`
 
-## 5.1 Import
-
-Hanya ekstensi `.fm` dan `.fs` yang diterima:
+### 5.1 Import
 
 ```fm
 import "views/header.fm" as Header;
 import "styles/base.fs" as Base;
 ```
 
-Catatan:
+Aturan:
+- hanya `.fm` dan `.fs`,
+- alias import harus unik,
+- siklus import ditolak.
 
-- Alias import dalam satu file harus unik.
-- Resolver akan menolak siklus import.
-
-## 5.2 Deklarasi Komponen
+### 5.2 Komponen
 
 ```fm
 component Header(title: string, subtitle?: string) {
@@ -111,51 +89,20 @@ component Header(title: string, subtitle?: string) {
 }
 ```
 
-Aturan utama:
+Aturan:
+- setiap `component` wajib 1 root node,
+- nama node diawali huruf kapital.
 
-- Tiap `component` wajib tepat 1 root node.
-- Nama node wajib diawali huruf kapital.
-
-## 5.3 Built-in Node (ringkas)
+### 5.3 Built-in Node
 
 - Layout: `Window`, `Page`, `Row`, `Column`, `Stack`, `Card`, `Scroll`, `Spacer`
 - Konten: `Text`, `Image`
-- Input/interaksi: `Button`, `Input`, `Checkbox`, `Switch`, `Modal`
-- Kontrol alur: `If`, `For`, `Slot`
+- Input: `Button`, `Input`, `Checkbox`, `Switch`, `Modal`
+- Control flow: `If`, `For`, `Slot`
 
-## 5.4 Control Flow
-
-`If`:
-
-```fm
-<If when=showModal>
-  <Text value="Modal aktif"/>
-</If>
-```
-
-`For`:
-
-```fm
-<For each=[{name: "A"}, {name: "B"}] as=item>
-  <Text value=item.name/>
-</For>
-```
-
-`Slot` untuk konten dari call-site:
-
-```fm
-component Frame(title: string) {
-  <Column>
-    <Text value=title/>
-    <Slot/>
-  </Column>
-}
-```
-
-## 5.5 Nilai Attribute
+### 5.4 Nilai Attribute
 
 Didukung:
-
 - `string`, `bool`, `int`, `float`
 - identifier
 - list literal
@@ -166,41 +113,14 @@ Contoh:
 ```fm
 <Text value="Halo"/>
 <Checkbox checked=true/>
-<Text value=item.tags.0/>
-<For each=[1, 2, 3] as=item>
-  <Text value=item/>
+<For each=[{name: "A"}, {name: "B"}] as=item>
+  <Text value=item.name/>
 </For>
-```
-
-## 5.6 Path Access
-
-- Field: `item.profile.title`
-- Index array: `item.tags.0`, `item.matrix.1.2`
-
-## 5.7 Komponen Kustom + Slot
-
-Pemanggilan:
-
-```fm
-<Header title="Halo">
-  <Text value="Isi slot"/>
-</Header>
-```
-
-Komponen target:
-
-```fm
-component Header(title: string) {
-  <Column>
-    <Text value=title/>
-    <Slot/>
-  </Column>
-}
 ```
 
 ## 6) Bahasa Style `.fs`
 
-## 6.1 Token
+### 6.1 Token
 
 ```fs
 token {
@@ -210,12 +130,7 @@ token {
 }
 ```
 
-Referensi token:
-
-- `token(color.accent)`
-- `token(color.accent, #3366ff)` (fallback)
-
-## 6.2 Style Rule
+### 6.2 Style Rule
 
 ```fs
 style BodyText {
@@ -224,342 +139,130 @@ style BodyText {
 }
 ```
 
-Dengan part:
-
-```fs
-style Modal:panel {
-  padding: 16dp;
-}
-```
-
 Catatan:
+- style key divalidasi allowlist,
+- duplicate style id ditolak,
+- unused token akan gagal compile (`E1304`).
 
-- Property divalidasi lewat allowlist CSS Formo.
-- Custom property `--*` diperbolehkan.
-- Duplicate `style id` lintas file ditolak.
-- Token yang tidak pernah dipakai akan gagal compile (`E1304`).
+## 7) Command CLI
 
-## 7) Referensi Command CLI
-
-Binary utama:
+Semua command dijalankan dengan pola berikut:
 
 ```bash
-cargo run -p formo-cli -- <command> [options]
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- <command> [options]
 ```
 
-## 7.1 `check`
-
-Validasi pipeline compile.
-
-Sintaks:
+### 7.1 check
 
 ```bash
-formo check [input|--input file] [--json] [--json-pretty] [--json-schema] [--watch]
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- check --input main.fm --json
 ```
 
-Default:
-
-- input: `main.fm`
-
-Contoh:
+### 7.2 diagnose
 
 ```bash
-cargo run -p formo-cli -- check main.fm
-cargo run -p formo-cli -- check --input main.fm --json
-cargo run -p formo-cli -- check --input main.fm --watch
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- diagnose --input main.fm --lsp
 ```
 
-## 7.2 `diagnose`
-
-Diagnostik detail + statistik IR; mendukung format JSON/LSP-like.
-
-Sintaks:
+### 7.3 lsp
 
 ```bash
-formo diagnose [input|--input file] [--json] [--json-pretty] [--json-schema] [--lsp] [--watch]
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- lsp --input main.fm --watch
 ```
 
-Catatan:
-
-- Mode ini memanfaatkan parser recovery (`parse_with_recovery`) untuk mengirim beberapa syntax error sekaligus.
-- `--lsp` mengubah payload menjadi `documents[].diagnostics[]`.
-
-Contoh:
+### 7.4 fmt
 
 ```bash
-cargo run -p formo-cli -- diagnose --input main.fm
-cargo run -p formo-cli -- diagnose --input main.fm --json
-cargo run -p formo-cli -- diagnose --input main.fm --lsp
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- fmt --input main.fm --check
 ```
 
-## 7.3 `lsp`
-
-Adapter ringan JSON-RPC `textDocument/publishDiagnostics`.
-
-Sintaks:
+### 7.5 doctor
 
 ```bash
-formo lsp [input|--input file] [--watch]
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- doctor --input main.fm --json-schema
 ```
 
-Contoh:
+### 7.6 bench
 
 ```bash
-cargo run -p formo-cli -- lsp --input main.fm
-cargo run -p formo-cli -- lsp --input main.fm --watch
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- bench --input main.fm --iterations 12 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --json-pretty --max-compile-p95-ms 120 --max-first-render-p95-ms 10
 ```
 
-## 7.4 `fmt`
-
-Formatter source `.fm`.
-
-Sintaks:
+### 7.7 build
 
 ```bash
-formo fmt [input|--input file] [--check] [--stdout]
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target desktop --input main.fm --out dist
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target multi --input main.fm --out dist
 ```
 
-Contoh:
+Backend opsional:
 
 ```bash
-cargo run -p formo-cli -- fmt --input main.fm
-cargo run -p formo-cli -- fmt --input main.fm --check
-cargo run -p formo-cli -- fmt --input main.fm --stdout
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli --no-default-features --features backend-web -- build --target web --input main.fm --out dist-web
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli --no-default-features --features backend-desktop -- build --target desktop --input main.fm --out dist-desktop
 ```
 
-## 7.5 `doctor`
+## 8) Output Build
 
-Health-check environment dan pipeline.
-
-Sintaks:
-
-```bash
-formo doctor [input|--input file] [--json] [--json-pretty] [--json-schema]
-```
-
-Contoh:
-
-```bash
-cargo run -p formo-cli -- doctor --input main.fm
-cargo run -p formo-cli -- doctor --input main.fm --json-schema
-```
-
-## 7.6 `bench`
-
-Benchmark compile-time + simulasi first-render.
-
-Sintaks:
-
-```bash
-formo bench [--input file] [--iterations N] [--warmup N] [--nodes N] [--out file] [--json-pretty] [--max-compile-p95-ms N] [--max-first-render-p95-ms N]
-```
-
-Default:
-
-- `input=main.fm`
-- `iterations=20`
-- `warmup=3`
-- `nodes=1000`
-- `out=dist-ci/bench/benchmark.json`
-
-Contoh baseline:
-
-```bash
-cargo run -p formo-cli -- bench --input main.fm --iterations 12 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --json-pretty
-```
-
-Contoh dengan budget gate:
-
-```bash
-cargo run -p formo-cli -- bench --input main.fm --iterations 12 --warmup 3 --nodes 1000 --out dist-ci/bench/benchmark.json --json-pretty --max-compile-p95-ms 120 --max-first-render-p95-ms 10
-```
-
-Perilaku budget:
-
-- Jika lewat budget: `ok: true`, exit code `0`
-- Jika melampaui budget: report tetap ditulis (`ok: false`), exit code non-zero
-
-## 7.7 `build`
-
-Generate output final target.
-
-Sintaks:
-
-```bash
-formo build [--target web|desktop|multi] [--input file] [--out dir] [--watch] [--prod]
-```
-
-Default:
-
-- `target=web`
-- `input=main.fm`
-- `out=dist`
-
-Contoh:
-
-```bash
-cargo run -p formo-cli -- build --target web --input main.fm --out dist
-cargo run -p formo-cli -- build --target desktop --input main.fm --out dist
-cargo run -p formo-cli -- build --target multi --input main.fm --out dist
-cargo run -p formo-cli -- build --target web --input main.fm --out dist --watch
-cargo run -p formo-cli -- build --target web --input main.fm --out dist --prod
-```
-
-Catatan `--prod`:
-
-- Minify `app.js` + `app.css` untuk target web.
-- Pada target `multi`, minify hanya untuk subfolder `web`.
-- Target desktop saat ini tidak memakai minify production flag.
-
-## 8) Mode Watch
-
-`--watch` tersedia di:
-
-- `check`
-- `diagnose`
-- `build`
-- `lsp`
-
-Perilaku:
-
-- polling setiap ~400ms
-- memantau perubahan file `.fm`/`.fs`
-- direktori yang di-skip: `.git`, `target`, `dist`, `dist2`, `node_modules`, `.idea`, `.vscode`
-
-## 9) Output Build per Target
-
-## 9.1 Web (`--target web`)
-
-Output:
-
+Web (`--target web`):
 - `index.html`
 - `app.css`
 - `app.js`
 
-## 9.2 Desktop (`--target desktop`)
-
-Output:
-
+Desktop (`--target desktop`):
 - `index.html`
 - `app.css`
 - `app.js`
 - `desktop-bridge.js`
 - `app.ir.json`
 
-## 9.3 Multi (`--target multi`)
+Multi (`--target multi`):
+- `out/web/*`
+- `out/desktop/*`
 
-Output:
+## 9) Diagnostik dan Error
 
-- `out/web/*` (bundle web)
-- `out/desktop/*` (bundle desktop)
-
-## 10) JSON Output dan Schema
-
-Schema id:
-
-- check: `https://formo.dev/schema/check-result/1`
-- diagnose: `https://formo.dev/schema/diagnose-result/1`
-- doctor: `https://formo.dev/schema/doctor-result/1`
-
-Aktifkan metadata schema:
-
-```bash
-cargo run -p formo-cli -- check --input main.fm --json-schema
-```
-
-## 11) Error Stage dan Kode
-
-Klasifikasi stage utama:
-
+Stage utama:
 - `parser` (`E11xx`)
 - `resolver` (`E12xx`)
 - `style` (`E13xx`)
 - `lowering` (`E14xx`)
 - `typer` (`E2xxx`)
-- fallback: `pipeline`
+- fallback `pipeline`
 
 Format error utama:
+- `code file:line:col message`
 
-`code file:line:col message`
+## 10) CI Minimal
 
-## 12) Integrasi LSP Ringan
-
-Perintah:
+Jalankan sebelum merge:
 
 ```bash
-cargo run -p formo-cli -- lsp --input main.fm --watch
+cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
+cargo clippy --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace --all-targets -- -D warnings
+cargo test --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
 ```
 
-Output STDOUT berupa satu baris JSON-RPC per dokumen:
-
-- `jsonrpc: "2.0"`
-- `method: "textDocument/publishDiagnostics"`
-- `params: { uri, diagnostics[] }`
-
-Ini bisa dibaca plugin editor custom sebagai adapter diagnostik awal.
-
-## 13) Integrasi Host Desktop (Bridge)
-
-Desktop bundle menyediakan `desktop-bridge.js` yang mengekspos:
-
-- `window.formoDesktopHost.invokeAction(...)` (diisi host aplikasi desktop)
-- `window.formoDesktop.setStatePatch(...)`
-- `window.formoDesktop.replaceState(...)`
-
-Contoh kontrak minimal host:
-
-```js
-window.formoDesktopHost = {
-  invokeAction(evt) {
-    // evt.name, evt.payload, evt.nodeId, evt.nodeName, evt.scope, evt.state
-  }
-};
-```
-
-## 14) CI Workflow yang Disarankan
-
-Urutan praktis:
-
-1. `cargo check --workspace`
-2. `cargo clippy --workspace --all-targets -- -D warnings`
-3. `cargo test --workspace`
-4. smoke build web/desktop
-5. `bench` + budget threshold
-
-Repository ini sudah punya baseline workflow di `.github/workflows/ci.yml`.
-
-## 15) Troubleshooting Cepat
+## 11) Troubleshooting
 
 `input file not found`
-
-- Pastikan path `--input` benar dari current directory.
+- pastikan path `--input` benar relatif terhadap direktori kerja.
 
 `unsupported target`
-
-- Gunakan hanya `web`, `desktop`, atau `multi`.
+- target valid hanya `web`, `desktop`, `multi`.
 
 `unknown style ...`
-
-- Pastikan style id ada di file `.fs` yang di-import.
+- pastikan style id tersedia di file `.fs` yang di-import.
 
 `cyclic import detected`
+- putus loop import antar module `.fm`.
 
-- Putus loop import antar file `.fm`.
-
-`unterminated ...` / syntax error parser
-
-- Gunakan `diagnose --json` atau `diagnose --lsp` untuk lokasi error lebih detail.
-
-## 16) Batasan Saat Ini
-
-- Parser belum mendukung text bebas di antara tag; gunakan `<Text value="..."/>`.
-- Desktop masih berupa bundle webview (packaging executable lintas OS masih tahap roadmap).
-- Benchmark first-render saat ini berbasis simulasi traversal IR, bukan browser perf test penuh.
-
-## 17) Referensi Dokumen Terkait
+## 12) Referensi
 
 - `README.md`
 - `PRODUCTION_ROADMAP.md`
+- `docs/LIBRARY_BOUNDARY.md`
 - `docs/IR_COMPATIBILITY.md`
 - `docs/IR_MIGRATIONS.md`
 - `docs/RELEASE_CHECKLIST.md`

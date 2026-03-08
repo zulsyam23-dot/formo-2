@@ -1,0 +1,32 @@
+{
+  "folders": [
+    {
+      "name": "formo-app",
+      "path": "."
+    },
+    {
+      "name": "formo-library-ecosystem",
+      "path": "../formo-library-ecosystem"
+    }
+  ],
+  "settings": {
+    "rust-analyzer.linkedProjects": [
+      "../formo-library-ecosystem/Cargo.toml"
+    ],
+    "rust-analyzer.check.overrideCommand": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--message-format=json",
+      "--all-targets",
+      "--manifest-path",
+      "../formo-library-ecosystem/Cargo.toml"
+    ],
+    "files.associations": {
+      "*.fm": "formo-fm",
+      "*.fs": "formo-fs"
+    },
+    "workbench.iconTheme": "formo-icons-local",
+    "editor.semanticHighlighting.enabled": false
+  }
+}
