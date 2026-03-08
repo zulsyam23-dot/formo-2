@@ -155,6 +155,14 @@ function collectDiagnosticsForDocument(workspaceRoot, document, cliJson) {
       );
     }
   } else if (cliJson.ok === false && diagnostics.length === 0) {
+    const inputTargetsCurrentDocument = matchesCurrentDocument(
+      workspaceRoot,
+      document,
+      cliJson.input
+    );
+    if (cliJson.input && !inputTargetsCurrentDocument) {
+      return diagnostics;
+    }
     diagnostics.push(
       toDiagnostic(document, {
         line: 1,
@@ -286,16 +294,13 @@ function activate(context) {
       const args = buildValidationArgs(workspaceRoot, document);
       const result = await runFormoCli(workspaceRoot, args);
       if (!result.json) {
-        diagnostics.set(
-          document.uri,
-          [
-            toDiagnostic(document, {
-              line: 1,
-              col: 1,
-              message: `Formo extension tidak bisa membaca output JSON validator.\n${result.output || ""}`
-            })
-          ]
+        diagnostics.delete(document.uri);
+        output.appendLine(
+          `[validator] JSON output tidak terbaca untuk ${document.fileName}`
         );
+        if (result.output) {
+          output.appendLine(result.output);
+        }
         return;
       }
       const docDiagnostics = collectDiagnosticsForDocument(
@@ -494,6 +499,8 @@ function activate(context) {
         .get("validation.trigger", "onSave");
       if (trigger === "onType") {
         scheduleValidation(document, false);
+      } else {
+        diagnostics.delete(document.uri);
       }
     })
   );

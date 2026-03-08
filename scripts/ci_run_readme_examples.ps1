@@ -1,6 +1,21 @@
 $ErrorActionPreference = "Stop"
-$ManifestPath = "..\formo-library-ecosystem\Cargo.toml"
-$LocalCargoTarget = "target/cargo-shared"
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$pathHelper = Join-Path $PSScriptRoot "formo_repo_paths.ps1"
+
+if (-not (Test-Path $pathHelper)) {
+    throw "path helper script not found: $pathHelper"
+}
+. $pathHelper
+
+$autoInstallLibrary = [string]::IsNullOrWhiteSpace($env:CI)
+$ManifestPath = Get-FormoLibraryManifestPath -RepoRoot $repoRoot -AutoInstall:$autoInstallLibrary -Quiet
+if (-not $ManifestPath) {
+    throw "library Cargo manifest not found. run scripts/formo2_bootstrap.ps1 once, or set FORMO_LIBRARY_ROOT / FORMO_LIBRARY_MANIFEST."
+}
+
+$LocalCargoTarget = Join-Path $repoRoot "target/cargo-shared"
+
+Set-Location $repoRoot
 
 New-Item -Path $LocalCargoTarget -ItemType Directory -Force | Out-Null
 $env:CARGO_TARGET_DIR = (Resolve-Path $LocalCargoTarget).Path

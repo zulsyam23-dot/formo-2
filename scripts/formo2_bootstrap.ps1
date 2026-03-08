@@ -5,19 +5,26 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$libraryRoot = Join-Path $repoRoot "..\formo-library-ecosystem"
-$manifestPath = Join-Path $libraryRoot "Cargo.toml"
+$pathHelper = Join-Path $PSScriptRoot "formo_repo_paths.ps1"
 $syncScript = Join-Path $PSScriptRoot "dev_sync_formo_vscode_extension.ps1"
 $workspaceFile = Join-Path $repoRoot "formo2.code-workspace"
 $localCargoTarget = Join-Path $repoRoot "target\cargo-shared"
 
-if (-not (Test-Path $libraryRoot)) {
-    throw "library repo not found: $libraryRoot"
+if (-not (Test-Path $pathHelper)) {
+    throw "path helper script not found: $pathHelper"
 }
 
-if (-not (Test-Path $manifestPath)) {
-    throw "library Cargo manifest not found: $manifestPath"
+. $pathHelper
+
+if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+    throw "cargo is not available in PATH. install Rust toolchain first (https://rustup.rs/)."
 }
+
+$resolution = Resolve-FormoLibrary -RepoRoot $repoRoot -AutoInstall
+if (-not $resolution) {
+    throw "library Cargo manifest not found. run this script with internet access once, or set FORMO_LIBRARY_ROOT / FORMO_LIBRARY_MANIFEST."
+}
+$manifestPath = $resolution.ManifestPath
 
 if (-not (Test-Path $workspaceFile)) {
     throw "workspace file not found: $workspaceFile"
@@ -37,3 +44,5 @@ if (-not $SkipCheck) {
 
 Write-Host "formo2 bootstrap complete."
 Write-Host "workspace: $workspaceFile"
+Write-Host "library manifest: $($resolution.ManifestPath)"
+Write-Host "library source: $($resolution.Source)"

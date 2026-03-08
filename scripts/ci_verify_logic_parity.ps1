@@ -7,6 +7,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$pathHelper = Join-Path $PSScriptRoot "formo_repo_paths.ps1"
+if (-not (Test-Path $pathHelper)) {
+    throw "path helper script not found: $pathHelper"
+}
+. $pathHelper
+
 function Resolve-RepoPath {
     param(
         [Parameter(Mandatory = $true)]
@@ -45,7 +51,8 @@ function Run-FormoCli {
 }
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$manifestPath = Resolve-RepoPath -PathValue "..\formo-library-ecosystem\Cargo.toml" -RepoRoot $repoRoot
+$autoInstallLibrary = [string]::IsNullOrWhiteSpace($env:CI)
+$manifestPath = Get-FormoLibraryManifestPath -RepoRoot $repoRoot -AutoInstall:$autoInstallLibrary -Quiet
 $localCargoTarget = Resolve-RepoPath -PathValue "target/cargo-shared" -RepoRoot $repoRoot
 $resolvedFm = Resolve-RepoPath -PathValue $InputFm -RepoRoot $repoRoot
 $resolvedLogic = Resolve-RepoPath -PathValue $LogicInput -RepoRoot $repoRoot
@@ -54,8 +61,8 @@ $resolvedRuntimeContractOut = Resolve-RepoPath -PathValue $RuntimeContractOut -R
 $desktopOutDir = Join-Path $resolvedOutDir "desktop"
 $webOutDir = Join-Path $resolvedOutDir "web"
 
-if (-not (Test-Path $manifestPath)) {
-    throw "library Cargo manifest not found: $manifestPath"
+if (-not $manifestPath -or -not (Test-Path $manifestPath)) {
+    throw "library Cargo manifest not found. run scripts/formo2_bootstrap.ps1 once, or set FORMO_LIBRARY_ROOT / FORMO_LIBRARY_MANIFEST."
 }
 if (-not (Test-Path $resolvedFm)) {
     throw "fm input not found: $resolvedFm"

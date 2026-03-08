@@ -8,14 +8,16 @@ Root repository ini (`formo`) berfungsi sebagai:
 - kontrak IR dan fixture.
 
 Semua source program compiler/runtime/tooling berada di repository library terpisah:
-- `C:\Users\PC\Documents\formo-library-ecosystem`
 - GitHub: `https://github.com/zulsyam23-dot/formo-library-ecosystem`
+
+Tidak wajib clone manual. Wrapper Formo 2 akan mencari library otomatis, lalu fallback auto-download ZIP ke:
+- `.formo/formo-library-ecosystem` (di dalam repo ini)
 
 ## Arsitektur 0.2 (Library-First)
 
 - `formo` fokus ke bahasa/proyek (`fm` + `fs` + `fl`).
 - `formo-library-ecosystem` fokus ke implementasi compiler/runtime/tooling.
-- Semua eksekusi CLI dilakukan via `--manifest-path ../formo-library-ecosystem/Cargo.toml`.
+- Semua eksekusi CLI lewat wrapper `.\formo2.cmd` (manifest path di-resolve otomatis).
 - Backend `web` dan `desktop` bersifat opsional (feature-gated di `formo-cli`).
 
 ### Layer Bahasa Formo 2
@@ -58,12 +60,20 @@ Opsional, jika ingin bootstrap penuh (check manifest + smoke test CLI):
 powershell -ExecutionPolicy Bypass -File .\scripts\formo2_bootstrap.ps1
 ```
 
-2. Jalankan CLI Formo 2 (wrapper aman):
+2. Jalankan CLI Formo 2 (wrapper aman, auto-resolve library path):
 
 ```bash
 .\formo2.cmd check --input main.fm
 .\formo2.cmd build --target web --input main.fm --out dist
 .\formo2.cmd parity
+.\formo2.cmd where-library
+```
+
+Pada run pertama, jika library belum ada, wrapper akan auto-download snapshot `formo-library-ecosystem`.
+Jalankan health check lokal:
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\scripts\formo2_doctor.ps1
 ```
 
 3. Validasi parity logika FL (JS dan Rust seragam):
@@ -111,12 +121,14 @@ Artifact web sekarang juga menyediakan `runtime/app/*.js` (split runtime source)
 - Help:
 
 ```bash
+.\\formo2.cmd help
 cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- help
 ```
 
 - Diagnose:
 
 ```bash
+.\\formo2.cmd diagnose --input main.fm --json
 cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- diagnose --input main.fm --json
 ```
 
@@ -166,6 +178,15 @@ cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- 
 - Checklist rilis: `docs/RELEASE_CHECKLIST.md`
 - IR compatibility: `docs/IR_COMPATIBILITY.md`
 - IR migrations: `docs/IR_MIGRATIONS.md`
+
+## Resolver Safety Knobs
+
+- `FORMO_LIBRARY_MANIFEST`: path absolut/relatif langsung ke `Cargo.toml` library.
+- `FORMO_LIBRARY_ROOT`: path root library (manifest diasumsikan di `<root>/Cargo.toml`).
+- `FORMO_LIBRARY_AUTO_INSTALL=0`: nonaktifkan auto-download ZIP library.
+- `FORMO_LIBRARY_ZIP_URL`: override URL ZIP source library.
+- `FORMO_LIBRARY_ZIP_SHA256`: verifikasi hash ZIP (opsional, direkomendasikan untuk CI/offline mirror).
+- `FORMO_LIBRARY_ALLOW_UNTRUSTED_URL=1`: izinkan host URL non-GitHub (gunakan hanya di jaringan internal tepercaya).
 
 ## Status
 

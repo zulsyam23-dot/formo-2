@@ -9,6 +9,7 @@
 /dist-readme/
 /dist-release/
 /dist-parity/
+/.formo/
 
 # Editors/OS
 .DS_Store

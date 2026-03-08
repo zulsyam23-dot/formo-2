@@ -7,20 +7,25 @@ Dokumen ini menjelaskan cara pakai Formo dalam model `0.2` (library-first), dari
 ## 1) Model Repository
 
 - Root `formo` menyimpan source bahasa aplikasi (`.fm`, `.fs`) + dokumentasi + kontrak.
-- Source compiler/runtime/tooling berada di `../formo-library-ecosystem`.
-- Semua command CLI menggunakan:
-  - `--manifest-path ../formo-library-ecosystem/Cargo.toml`
+- Source compiler/runtime/tooling berada di `formo-library-ecosystem` (auto-discover).
+- Wrapper `.\formo2.cmd` otomatis mencari library pada:
+  - `FORMO_LIBRARY_MANIFEST` / `FORMO_LIBRARY_ROOT` (jika diset),
+  - sibling `../formo-library-ecosystem`,
+  - local cache `.formo/formo-library-ecosystem` (auto-download ZIP bila belum ada).
+- Cek library yang aktif dipakai wrapper:
+  - `.\formo2.cmd where-library`
 
 ## 2) Prasyarat
 
 - Rust stable terpasang.
 - Cargo tersedia di PATH.
-- Folder `formo` dan `formo-library-ecosystem` berada dalam parent direktori yang sama.
+- Tidak wajib clone dua repo. Download repo `formo` saja tetap bisa dipakai.
 
 Verifikasi:
 
 ```bash
-cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
+.\formo2.cmd check --input main.fm
+powershell -ExecutionPolicy Bypass -File .\scripts\formo2_doctor.ps1
 ```
 
 ## 3) Struktur Proyek Formo
@@ -46,25 +51,25 @@ cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
 1. Check:
 
 ```bash
-cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- check --input main.fm
+.\formo2.cmd check --input main.fm
 ```
 
 2. Diagnose:
 
 ```bash
-cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- diagnose --input main.fm --json
+.\formo2.cmd diagnose --input main.fm --json
 ```
 
 3. Build desktop:
 
 ```bash
-cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target desktop --input main.fm --out dist --strict-parity
+.\formo2.cmd build --target desktop --input main.fm --out dist --strict-parity
 ```
 
 4. Build web:
 
 ```bash
-cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist
+.\formo2.cmd build --target web --input main.fm --out dist
 ```
 
 5. Parity gate logika lintas web-desktop:
