@@ -8,6 +8,7 @@
 /dist-ci/
 /dist-readme/
 /dist-release/
+/dist-parity/
 
 # Editors/OS
 .DS_Store

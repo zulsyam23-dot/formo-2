@@ -9,6 +9,7 @@ $libraryRoot = Join-Path $repoRoot "..\formo-library-ecosystem"
 $manifestPath = Join-Path $libraryRoot "Cargo.toml"
 $syncScript = Join-Path $PSScriptRoot "dev_sync_formo_vscode_extension.ps1"
 $workspaceFile = Join-Path $repoRoot "formo2.code-workspace"
+$localCargoTarget = Join-Path $repoRoot "target\cargo-shared"
 
 if (-not (Test-Path $libraryRoot)) {
     throw "library repo not found: $libraryRoot"
@@ -21,6 +22,9 @@ if (-not (Test-Path $manifestPath)) {
 if (-not (Test-Path $workspaceFile)) {
     throw "workspace file not found: $workspaceFile"
 }
+
+New-Item -Path $localCargoTarget -ItemType Directory -Force | Out-Null
+$env:CARGO_TARGET_DIR = $localCargoTarget
 
 & powershell -ExecutionPolicy Bypass -File $syncScript -Scope local -CleanupGlobal
 

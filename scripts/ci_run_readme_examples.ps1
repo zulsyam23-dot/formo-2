@@ -1,5 +1,9 @@
 $ErrorActionPreference = "Stop"
 $ManifestPath = "..\formo-library-ecosystem\Cargo.toml"
+$LocalCargoTarget = "target/cargo-shared"
+
+New-Item -Path $LocalCargoTarget -ItemType Directory -Force | Out-Null
+$env:CARGO_TARGET_DIR = (Resolve-Path $LocalCargoTarget).Path
 
 function Run-Cargo {
     param(
@@ -7,7 +11,17 @@ function Run-Cargo {
         [string[]]$Args
     )
 
-    $finalArgs = @("--manifest-path", $ManifestPath) + $Args
+    if ($Args.Count -eq 0) {
+        throw "Run-Cargo requires at least one cargo subcommand"
+    }
+
+    $subcommand = $Args[0]
+    $rest = @()
+    if ($Args.Count -gt 1) {
+        $rest = $Args[1..($Args.Count - 1)]
+    }
+
+    $finalArgs = @($subcommand, "--manifest-path", $ManifestPath) + $rest
     Write-Host ">> cargo $($finalArgs -join ' ')"
     & cargo @finalArgs
     if ($LASTEXITCODE -ne 0) {
@@ -47,6 +61,7 @@ Copy-Item $mainBackup "main.fm" -Force
 
 Run-Cargo @("run", "-p", "formo-cli", "--", "doctor", "--input", "main.fm", "--json")
 Run-Cargo @("run", "-p", "formo-cli", "--", "doctor", "--input", "main.fm", "--json-schema")
+Run-Cargo @("run", "-p", "formo-cli", "--", "logic", "--input", "logic/controllers/app_controller.fl", "--json-pretty", "--rt-manifest-out", "dist-ci/readme/fl-runtime-contract.json")
 
 Run-Cargo @(
     "run",
@@ -74,6 +89,8 @@ Run-Cargo @(
 Run-Cargo @("run", "-p", "formo-cli", "--", "build", "--target", "web", "--input", "main.fm", "--out", "dist-readme/web")
 Run-Cargo @("run", "-p", "formo-cli", "--", "build", "--target", "desktop", "--input", "main.fm", "--out", "dist-readme/desktop")
 Run-Cargo @("run", "-p", "formo-cli", "--", "build", "--target", "multi", "--input", "main.fm", "--out", "dist-readme/multi")
+Run-Cargo @("run", "-p", "formo-cli", "--", "build", "--target", "desktop", "--input", "main.fm", "--out", "dist-readme/desktop-strict", "--strict-parity")
+Run-Cargo @("run", "-p", "formo-cli", "--", "build", "--target", "web", "--input", "main.fm", "--out", "dist-readme/web-follow-desktop")
 Run-Cargo @("run", "-p", "formo-cli", "--", "build", "--target", "web", "--input", "main.fm", "--out", "dist-readme/web-prod", "--prod")
 
 Write-Host "README example commands completed successfully."

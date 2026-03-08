@@ -24,7 +24,8 @@
     ],
     "files.associations": {
       "*.fm": "formo-fm",
-      "*.fs": "formo-fs"
+      "*.fs": "formo-fs",
+      "*.fl": "formo-fl"
     },
     "workbench.iconTheme": "formo-icons-local",
     "editor.semanticHighlighting.enabled": false

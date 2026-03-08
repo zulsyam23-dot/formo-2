@@ -1,0 +1,5 @@
+module NavigationPort;
+
+contract NavigationPort {
+  event navigate {}
+}

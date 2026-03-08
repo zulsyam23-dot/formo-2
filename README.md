@@ -3,7 +3,7 @@
 Formo adalah bahasa deklaratif untuk UI lintas target.
 
 Root repository ini (`formo`) berfungsi sebagai:
-- source bahasa aplikasi (`.fm`, `.fs`),
+- source bahasa aplikasi (`.fm`, `.fs`, `.fl`),
 - dokumentasi produk,
 - kontrak IR dan fixture.
 
@@ -13,10 +13,27 @@ Semua source program compiler/runtime/tooling berada di repository library terpi
 
 ## Arsitektur 0.2 (Library-First)
 
-- `formo` fokus ke bahasa/proyek.
+- `formo` fokus ke bahasa/proyek (`fm` + `fs` + `fl`).
 - `formo-library-ecosystem` fokus ke implementasi compiler/runtime/tooling.
 - Semua eksekusi CLI dilakukan via `--manifest-path ../formo-library-ecosystem/Cargo.toml`.
 - Backend `web` dan `desktop` bersifat opsional (feature-gated di `formo-cli`).
+
+### Layer Bahasa Formo 2
+
+- `FM` (UI): deklarasi komponen/view.
+- `FS` (Style): deklarasi token/style.
+- `FL` (Logic): deklarasi state/event/action lintas web-desktop.
+- `FL` menjadi source logika tunggal. Build `web` dan `desktop` wajib lulus parity gate yang sama.
+
+Struktur OOP rekomendasi untuk `FL`:
+
+```text
+logic/
+  controllers/
+  services/
+  contracts/
+  platform/
+```
 
 ## Quick Start
 
@@ -47,24 +64,31 @@ Dengan model ini, saat folder repo `formo` dihapus, extension lokal ikut hilang 
 ```bash
 .\formo2.cmd check --input main.fm
 .\formo2.cmd build --target web --input main.fm --out dist
+.\formo2.cmd parity
 ```
 
-3. Validasi workspace library:
+3. Validasi parity logika FL (JS dan Rust seragam):
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\scripts\ci_verify_logic_parity.ps1
+```
+
+Script ini akan:
+- validasi `logic/controllers/app_controller.fl`,
+- generate runtime contract `.fl`,
+- build `desktop` dengan `--strict-parity` sebagai baseline,
+- lalu build `web` agar mengikuti baseline desktop.
+
+4. Validasi workspace library:
 
 ```bash
 cargo check --manifest-path ../formo-library-ecosystem/Cargo.toml --workspace
 ```
 
-4. Validasi source Formo:
+5. Validasi source Formo:
 
 ```bash
 cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- check --input main.fm
-```
-
-5. Build web:
-
-```bash
-cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist
 ```
 
 6. Build desktop:
@@ -72,6 +96,16 @@ cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- 
 ```bash
 cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target desktop --input main.fm --out dist
 ```
+
+Artifact desktop sekarang juga menyediakan folder `readable/` berisi JSON terpecah agar audit manusia/AI lebih mudah.
+
+7. Build web:
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist
+```
+
+Artifact web sekarang juga menyediakan `runtime/app/*.js` (split runtime source) selain `app.js` bundle.
 
 ## Command Reference (Ringkas)
 
@@ -111,10 +145,24 @@ cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli --n
 cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli --no-default-features --features backend-desktop -- build --target desktop --input main.fm --out dist-desktop
 ```
 
+- Logic parity contract (`.fl`):
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- logic --input logic/controllers/app_controller.fl --json-pretty --rt-manifest-out target/parity/fl-runtime-contract.json
+```
+
+- Build parity ketat (wajib seragam lintas target):
+
+```bash
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target desktop --input main.fm --out dist --strict-parity
+cargo run --manifest-path ../formo-library-ecosystem/Cargo.toml -p formo-cli -- build --target web --input main.fm --out dist
+```
+
 ## Dokumentasi Utama
 
 - Panduan penggunaan: `docs/PANDUAN_PENGGUNAAN.md`
 - Boundary formo vs library: `docs/LIBRARY_BOUNDARY.md`
+- Formo logic layer (`.fl`): `docs/FORMO_LOGIC_LAYER.md`
 - Roadmap produksi: `PRODUCTION_ROADMAP.md`
 - Checklist rilis: `docs/RELEASE_CHECKLIST.md`
 - IR compatibility: `docs/IR_COMPATIBILITY.md`
