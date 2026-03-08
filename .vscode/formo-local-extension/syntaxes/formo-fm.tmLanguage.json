@@ -1,0 +1,159 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Formo FM",
+  "scopeName": "source.formo.fm",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#declarations"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#tags"
+    },
+    {
+      "include": "#attributes"
+    },
+    {
+      "include": "#refs"
+    },
+    {
+      "include": "#booleans"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.formo",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.formo",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.formo",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.formo",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "name": "keyword.declaration.formo",
+          "match": "\\b(import|component|as)\\b"
+        },
+        {
+          "name": "entity.name.function.component.formo",
+          "match": "(?<=\\bcomponent\\s+)[A-Z][A-Za-z0-9_]*\\b"
+        },
+        {
+          "name": "entity.name.type.alias.formo",
+          "match": "(?<=\\bas\\s+)[A-Z][A-Za-z0-9_]*\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.formo",
+          "match": "\\b(If|For|Slot)\\b"
+        }
+      ]
+    },
+    "tags": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.tag.begin.formo",
+          "match": "</?"
+        },
+        {
+          "name": "punctuation.definition.tag.end.formo",
+          "match": "/?>"
+        },
+        {
+          "name": "entity.name.tag.formo",
+          "match": "(?<=</?)[A-Z][A-Za-z0-9_]*"
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "name": "entity.other.attribute-name.formo",
+          "match": "\\b[a-z][A-Za-z0-9_]*(?=\\s*=)"
+        },
+        {
+          "name": "keyword.operator.assignment.formo",
+          "match": "="
+        }
+      ]
+    },
+    "refs": {
+      "patterns": [
+        {
+          "name": "variable.other.style-ref.formo",
+          "match": "(?<=\\bstyle\\s*=\\s*)[A-Z][A-Za-z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other.event-handler.formo",
+          "match": "(?<=\\b(?:onPress|onChange|onSubmit|onClick|onInput)\\s*=\\s*)[a-zA-Z_][A-Za-z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other.member-access.formo",
+          "match": "\\b[a-z][A-Za-z0-9_]*(?:\\.[a-z][A-Za-z0-9_]*)+\\b"
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.formo",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.formo",
+          "match": "\\b\\d+(?:\\.\\d+)?(?:dp|px|%)?\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.formo",
+          "match": "[{}()\\[\\],:]"
+        }
+      ]
+    }
+  }
+}

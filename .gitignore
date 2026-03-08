@@ -13,7 +13,12 @@
 # Editors/OS
 .DS_Store
 Thumbs.db
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/formo-local-extension/
+!.vscode/formo-local-extension/**
 .idea/
 
 # Optional local overrides

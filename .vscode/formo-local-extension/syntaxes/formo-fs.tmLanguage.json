@@ -1,0 +1,143 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Formo FS",
+  "scopeName": "source.formo.fs",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#hex"
+    },
+    {
+      "include": "#declarations"
+    },
+    {
+      "include": "#tokenKeys"
+    },
+    {
+      "include": "#styleProps"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.formo",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.formo",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.formo",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.formo",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "hex": {
+      "patterns": [
+        {
+          "name": "constant.other.color.hex.formo",
+          "match": "#[0-9a-fA-F]{3,8}\\b"
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "name": "keyword.declaration.formo",
+          "match": "\\b(token|style)\\b"
+        },
+        {
+          "name": "entity.name.type.style.formo",
+          "match": "(?<=\\bstyle\\s+)[A-Z][A-Za-z0-9_]*\\b"
+        }
+      ]
+    },
+    "tokenKeys": {
+      "patterns": [
+        {
+          "name": "variable.other.tokenkey.formo",
+          "match": "\\b[a-z][A-Za-z0-9_.]*(?=\\s*=)"
+        },
+        {
+          "name": "variable.other.tokenkey.formo",
+          "match": "(?<=\\btoken\\()[a-z][A-Za-z0-9_.]*(?=\\))"
+        }
+      ]
+    },
+    "styleProps": {
+      "patterns": [
+        {
+          "name": "support.type.property-name.formo",
+          "match": "\\b[a-z][A-Za-z0-9_-]*(?=\\s*:)"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.formo",
+          "match": "\\btoken(?=\\s*\\()"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.formo",
+          "match": "\\b\\d+(?:\\.\\d+)?(?:dp|px|%|rem|em|ms|s)?\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.formo",
+          "match": "[=:]"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.terminator.statement.formo",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.section.block.formo",
+          "match": "[{}()]"
+        }
+      ]
+    }
+  }
+}

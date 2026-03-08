@@ -1,0 +1,38 @@
+﻿{
+  "FM Import": {
+    "prefix": "fm-import",
+    "body": [
+      "import \"${1:views/header.fm}\" as ${2:Header};"
+    ],
+    "description": "Import file .fm/.fs dengan alias PascalCase"
+  },
+  "FM Component": {
+    "prefix": "fm-component",
+    "body": [
+      "component ${1:HomePage}(${2:title: string}) {",
+      "  <${3:Page}>",
+      "    $0",
+      "  </${3:Page}>",
+      "}"
+    ],
+    "description": "Template component Formo FM"
+  },
+  "FM If": {
+    "prefix": "fm-if",
+    "body": [
+      "<If when=${1:condition}>",
+      "  $0",
+      "</If>"
+    ],
+    "description": "Control flow If"
+  },
+  "FM For": {
+    "prefix": "fm-for",
+    "body": [
+      "<For each=${1:items} as=${2:item}>",
+      "  $0",
+      "</For>"
+    ],
+    "description": "Loop For"
+  }
+}

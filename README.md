@@ -37,17 +37,10 @@ logic/
 
 ## Quick Start
 
-0. Bootstrap Formo 2 (aman + terstruktur):
+0. Buka folder/repo Formo di VS Code.
 
-```bash
-powershell -ExecutionPolicy Bypass -File .\scripts\formo2_bootstrap.ps1
-```
-
-Command ini akan:
-- validasi `../formo-library-ecosystem/Cargo.toml`,
-- sinkron extension Formo lokal ke `.vscode/.extensions`,
-- hapus extension Formo global lama (anti-bentrok),
-- jalankan `formo-cli check` untuk smoke test.
+Support editor untuk `.fm`, `.fs`, `.fl` sekarang disiapkan otomatis saat folder dibuka
+(task `formo:auto-enable-editor-support`), tanpa setup manual PowerShell.
 
 1. Buka workspace Formo 2:
 
@@ -58,6 +51,12 @@ Command ini akan:
 Perintah ini akan membuka [formo2.code-workspace](formo2.code-workspace) dengan local extension dir.
 
 Dengan model ini, saat folder repo `formo` dihapus, extension lokal ikut hilang otomatis.
+
+Opsional, jika ingin bootstrap penuh (check manifest + smoke test CLI):
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\scripts\formo2_bootstrap.ps1
+```
 
 2. Jalankan CLI Formo 2 (wrapper aman):
 

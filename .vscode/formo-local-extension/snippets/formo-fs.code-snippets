@@ -1,0 +1,29 @@
+﻿{
+  "FS Token Block": {
+    "prefix": "fs-token",
+    "body": [
+      "token {",
+      "  ${1:color.primary} = ${2:#0A84FF};",
+      "  $0",
+      "}"
+    ],
+    "description": "Template block token"
+  },
+  "FS Style Block": {
+    "prefix": "fs-style",
+    "body": [
+      "style ${1:BodyText} {",
+      "  ${2:color}: ${3:token(color.primary)};",
+      "  $0",
+      "}"
+    ],
+    "description": "Template style"
+  },
+  "FS Token Ref": {
+    "prefix": "fs-token-ref",
+    "body": [
+      "token(${1:color.primary})"
+    ],
+    "description": "Referensi token()"
+  }
+}

@@ -1,0 +1,17 @@
+﻿{
+  "files.associations": {
+    "*.fm": "formo-fm",
+    "*.fs": "formo-fs",
+    "*.fl": "formo-fl"
+  },
+  "editor.semanticHighlighting.enabled": false,
+  "[formo-fm]": {
+    "editor.semanticHighlighting.enabled": false
+  },
+  "[formo-fs]": {
+    "editor.semanticHighlighting.enabled": false
+  },
+  "[formo-fl]": {
+    "editor.semanticHighlighting.enabled": false
+  }
+}

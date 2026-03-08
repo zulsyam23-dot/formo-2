@@ -1,0 +1,155 @@
+{
+  "name": "formo-local",
+  "displayName": "Formo Local",
+  "description": "Modern local Formo language support with richer grammar, snippets, and icons",
+  "publisher": "formo",
+  "version": "0.0.5",
+  "main": "./extension.js",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onLanguage:formo-fm",
+    "onLanguage:formo-fs",
+    "onLanguage:formo-fl",
+    "onCommand:formo.validateCurrent",
+    "onCommand:formo.explainDiagnostic"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "categories": [
+    "Programming Languages",
+    "Themes"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "formo-fm",
+        "aliases": [
+          "Formo FM",
+          "formo-fm"
+        ],
+        "extensions": [
+          ".fm"
+        ],
+        "icon": {
+          "light": "./icons/formo-file.svg",
+          "dark": "./icons/formo-file.svg"
+        },
+        "configuration": "./language-configuration-fm.json"
+      },
+      {
+        "id": "formo-fs",
+        "aliases": [
+          "Formo FS",
+          "formo-fs"
+        ],
+        "extensions": [
+          ".fs"
+        ],
+        "icon": {
+          "light": "./icons/formo-file.svg",
+          "dark": "./icons/formo-file.svg"
+        },
+        "configuration": "./language-configuration-fs.json"
+      },
+      {
+        "id": "formo-fl",
+        "aliases": [
+          "Formo FL",
+          "formo-fl"
+        ],
+        "extensions": [
+          ".fl"
+        ],
+        "icon": {
+          "light": "./icons/formo-file.svg",
+          "dark": "./icons/formo-file.svg"
+        },
+        "configuration": "./language-configuration-fl.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "formo-fm",
+        "scopeName": "source.formo.fm",
+        "path": "./syntaxes/formo-fm.tmLanguage.json"
+      },
+      {
+        "language": "formo-fs",
+        "scopeName": "source.formo.fs",
+        "path": "./syntaxes/formo-fs.tmLanguage.json"
+      },
+      {
+        "language": "formo-fl",
+        "scopeName": "source.formo.fl",
+        "path": "./syntaxes/formo-fl.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "formo-fm",
+        "path": "./snippets/formo-fm.code-snippets"
+      },
+      {
+        "language": "formo-fs",
+        "path": "./snippets/formo-fs.code-snippets"
+      },
+      {
+        "language": "formo-fl",
+        "path": "./snippets/formo-fl.code-snippets"
+      }
+    ],
+    "commands": [
+      {
+        "command": "formo.validateCurrent",
+        "title": "Formo: Validate Current File"
+      },
+      {
+        "command": "formo.explainDiagnostic",
+        "title": "Formo: Explain Current Diagnostic"
+      }
+    ],
+    "configuration": {
+      "title": "Formo",
+      "properties": {
+        "formo.validation.trigger": {
+          "type": "string",
+          "enum": [
+            "onSave",
+            "onType"
+          ],
+          "default": "onSave",
+          "description": "When to run Formo validation from extension."
+        },
+        "formo.validation.debounceMs": {
+          "type": "number",
+          "default": 800,
+          "minimum": 150,
+          "description": "Debounce delay in milliseconds for onType validation."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[formo-fm]": {
+        "editor.semanticHighlighting.enabled": false
+      },
+      "[formo-fs]": {
+        "editor.semanticHighlighting.enabled": false
+      },
+      "[formo-fl]": {
+        "editor.semanticHighlighting.enabled": false
+      }
+    },
+    "iconThemes": [
+      {
+        "id": "formo-icons-local",
+        "label": "Formo Icons Local",
+        "path": "./themes/formo-icons.json"
+      }
+    ]
+  }
+}

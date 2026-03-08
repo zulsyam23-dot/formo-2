@@ -1,0 +1,89 @@
+﻿{
+  "FL Logic Unit": {
+    "prefix": "fl-logic",
+    "body": [
+      "module ${1:AppController};",
+      "use \"../services/session_service.fl\" as SessionService;",
+      "use \"../platform/desktop_adapter.fl\" as DesktopAdapter;",
+      "use \"../platform/web_adapter.fl\" as WebAdapter;",
+      "",
+      "logic ${1:AppController} {",
+      "  state {",
+      "    ${2:isReady}: bool = false;",
+      "  }",
+      "",
+      "  event ${3:startApp} {",
+      "    action call SessionService.bootstrap;",
+      "    action set ${2:isReady} = true;",
+      "    platform desktop {",
+      "      action call DesktopAdapter.focusMainWindow;",
+      "    }",
+      "    platform web {",
+      "      action call WebAdapter.syncBrowserRoute;",
+      "    }",
+      "  }",
+      "}"
+    ],
+    "description": "Template logic unit sesuai parser FL terbaru"
+  },
+  "FL Service Unit": {
+    "prefix": "fl-service",
+    "body": [
+      "module ${1:SessionService};",
+      "",
+      "service ${1:SessionService} {",
+      "  state {",
+      "    ${2:retryCount}: int = 0;",
+      "  }",
+      "",
+      "  event ${3:bootstrap} {",
+      "    action emit \"${4:READY}\";",
+      "  }",
+      "}"
+    ],
+    "description": "Template service unit (tanpa platform block)"
+  },
+  "FL Adapter Unit": {
+    "prefix": "fl-adapter",
+    "body": [
+      "module ${1:WebAdapter};",
+      "",
+      "adapter ${1:WebAdapter} {",
+      "  event ${2:syncBrowserRoute} {",
+      "    action call ${3:Browser.historyPush};",
+      "  }",
+      "}"
+    ],
+    "description": "Template adapter unit"
+  },
+  "FL Contract Unit": {
+    "prefix": "fl-contract",
+    "body": [
+      "module ${1:NavigationPort};",
+      "",
+      "contract ${1:NavigationPort} {",
+      "  event ${2:navigate} {}",
+      "}"
+    ],
+    "description": "Template contract unit"
+  },
+  "FL Action Call": {
+    "prefix": "fl-call",
+    "body": [
+      "action call ${1:Alias.member};"
+    ],
+    "description": "Action call valid: wajib Alias.member;"
+  },
+  "FL Try Catch": {
+    "prefix": "fl-try",
+    "body": [
+      "try {",
+      "  action throw \"${1:ERROR_CODE}\";",
+      "}",
+      "catch {",
+      "  action emit \"${2:RECOVERED}\";",
+      "}"
+    ],
+    "description": "Template try/catch"
+  }
+}

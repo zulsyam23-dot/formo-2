@@ -1,0 +1,22 @@
+{
+  "$schema": "vscode://schemas/icon-theme",
+  "iconDefinitions": {
+    "formo-file": {
+      "iconPath": "../icons/formo-file.svg"
+    }
+  },
+  "fileExtensions": {
+    "fm": "formo-file",
+    "fs": "formo-file",
+    "fl": "formo-file"
+  },
+  "fileNames": {
+    "main.fm": "formo-file"
+  },
+  "languageIds": {
+    "formo-fm": "formo-file",
+    "formo-fs": "formo-file",
+    "formo-fl": "formo-file"
+  },
+  "hidesExplorerArrows": false
+}
